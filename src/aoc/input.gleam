@@ -52,5 +52,5 @@ pub fn read(year: Int, day: Int) -> Input {
       ""
     }
   }
-  Input(real, fake)
+  Input(fake, real)
 }
