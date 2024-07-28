@@ -20,37 +20,24 @@ pub fn real(input: Input) {
 pub fn read(year: Int, day: Int) -> Input {
   let year = int.to_string(year) |> string.pad_left(4, "0")
   let day = int.to_string(day) |> string.pad_left(2, "0")
-  let real = case
-    simplifile.read("./res/year_" <> year <> "/day_" <> day <> "/real.txt")
-  {
-    Ok(real) -> real
-    Error(err) -> {
-      let err_msg =
-        string_builder.new()
-        |> string_builder.append("Could not load input file \"real\".\n")
-        |> string_builder.append(simplifile.describe_error(err))
-        |> string_builder.to_string
-      io.print_error(err_msg)
-      process.exit(1)
-
-      ""
-    }
-  }
-  let fake = case
-    simplifile.read("./res/year_" <> year <> "/day_" <> day <> "/fake.txt")
-  {
-    Ok(fake) -> fake
-    Error(err) -> {
-      let err_msg =
-        string_builder.new()
-        |> string_builder.append("Could not load input file \"fake\".\n")
-        |> string_builder.append(simplifile.describe_error(err))
-        |> string_builder.to_string
-      io.print_error(err_msg)
-      process.exit(1)
-
-      ""
-    }
-  }
+  let real =
+    read_or_exit("./res/year_" <> year <> "/day_" <> day <> "/real.txt")
+  let fake =
+    read_or_exit("./res/year_" <> year <> "/day_" <> day <> "/fake.txt")
   Input(fake, real)
+}
+
+fn read_or_exit(file: String) -> String {
+  case simplifile.read(file) {
+    Ok(content) -> content
+    Error(error) -> {
+      string_builder.new()
+      |> string_builder.append("Could not load input file.\n")
+      |> string_builder.append(simplifile.describe_error(error))
+      |> string_builder.to_string()
+      |> io.print_error()
+      process.exit(1)
+      panic
+    }
+  }
 }
