@@ -1,20 +1,27 @@
 import aoc/aoc
 import aoc/input
 import aoc/part
-import gleam/dict
 import gleam/int
 import gleam/io
 import gleam/list
 import gleam/result
 import gleam/string
 
+const string_to_int = [
+  #("one", 1), #("two", 2), #("three", 3), #("four", 4), #("five", 5),
+  #("six", 6), #("seven", 7), #("eight", 8), #("nine", 9),
+]
+
 pub fn main() {
+  // Part one will fail, unless you use the fake
+  // input provided by Advent of Code for that part.
   let input = input.read(2023, 1)
+
   let one = part.one(input, solve_part_one)
   let two = part.two(input, solve_part_two)
 
-  // io.println(aoc.run_fake(one, "142"))
-  // io.println(aoc.run_real(one))
+  io.println(aoc.run_fake(one, "142"))
+  io.println(aoc.run_real(one))
 
   io.println(aoc.run_fake(two, "281"))
   io.println(aoc.run_real(two))
@@ -28,7 +35,8 @@ fn solve_part_one(input: String) -> String {
 }
 
 fn solve_part_two(input: String) -> String {
-  string.split(input, "\n")
+  input
+  |> string.split("\n")
   |> list.map(fn(line) {
     let left = parse_left(line)
     let right = parse_right(line)
@@ -42,31 +50,22 @@ fn solve_part_two(input: String) -> String {
 fn parse_line(line: String) -> Int {
   let digits =
     line
-    |> string.split("")
+    |> string.to_graphemes()
     |> list.filter_map(int.parse)
   let assert Ok(first) = list.first(digits)
   let assert Ok(last) = list.last(digits)
-  io.debug([first, last])
   10 * first + last
 }
 
-fn substitute_word(line: String) -> String {
-  line
-  |> string.replace("one", "1")
-  |> string.replace("two", "2")
-  |> string.replace("three", "3")
-  |> string.replace("four", "4")
-  |> string.replace("five", "5")
-  |> string.replace("six", "6")
-  |> string.replace("seven", "7")
-  |> string.replace("eight", "8")
-  |> string.replace("nine", "9")
-}
+fn parse_left(line: String) -> Int {
+  let number = parse_number_left(line)
+  let number_string = parse_number_string_left(line)
 
-const string_to_int = [
-  #("one", 1), #("two", 2), #("three", 3), #("four", 4), #("five", 5),
-  #("six", 6), #("seven", 7), #("eight", 8), #("nine", 9),
-]
+  case result.or(number, number_string) {
+    Ok(n) -> n
+    Error(_) -> parse_left(string.drop_left(line, 1))
+  }
+}
 
 fn parse_number_left(string: String) -> Result(Int, Nil) {
   use first <- result.try(string.first(string))
@@ -82,13 +81,13 @@ fn parse_number_string_left(string: String) -> Result(Int, Nil) {
   })
 }
 
-fn parse_left(line: String) -> Int {
-  let number = parse_number_left(line)
-  let number_string = parse_number_string_left(line)
+fn parse_right(line: String) -> Int {
+  let number = parse_number_right(line)
+  let number_string = parse_number_string_right(line)
 
   case result.or(number, number_string) {
     Ok(n) -> n
-    Error(_) -> parse_left(string.drop_left(line, 1))
+    Error(_) -> parse_right(string.drop_right(line, 1))
   }
 }
 
@@ -104,14 +103,4 @@ fn parse_number_string_right(string: String) -> Result(Int, Nil) {
       False -> Error(Nil)
     }
   })
-}
-
-fn parse_right(line: String) -> Int {
-  let number = parse_number_right(line)
-  let number_string = parse_number_string_right(line)
-
-  case result.or(number, number_string) {
-    Ok(n) -> n
-    Error(_) -> parse_right(string.drop_right(line, 1))
-  }
 }
