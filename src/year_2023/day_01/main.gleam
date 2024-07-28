@@ -38,10 +38,9 @@ fn solve_part_two(input: String) -> String {
   input
   |> string.split("\n")
   |> list.map(fn(line) {
-    let left = parse_left(line)
-    let right = parse_right(line)
-    let assert Ok(value) = int.undigits([left, right], 10)
-    value
+    let first = parse_left(line)
+    let last = parse_right(line)
+    to_value(first, last)
   })
   |> list.fold(0, int.add)
   |> int.to_string()
@@ -54,7 +53,7 @@ fn parse_line(line: String) -> Int {
     |> list.filter_map(int.parse)
   let assert Ok(first) = list.first(digits)
   let assert Ok(last) = list.last(digits)
-  10 * first + last
+  to_value(first, last)
 }
 
 fn parse_left(line: String) -> Int {
@@ -65,6 +64,10 @@ fn parse_left(line: String) -> Int {
     Ok(n) -> n
     Error(_) -> parse_left(string.drop_left(line, 1))
   }
+}
+
+fn to_value(first_digit: Int, last_digit: Int) -> Int {
+  10 * first_digit + last_digit
 }
 
 fn parse_number_left(string: String) -> Result(Int, Nil) {
