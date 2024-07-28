@@ -74,8 +74,9 @@ fn parse_number_left(string: String) -> Result(Int, Nil) {
 
 fn parse_number_string_left(string: String) -> Result(Int, Nil) {
   list.find_map(string_to_int, fn(x) {
-    case string.starts_with(string, x.0) {
-      True -> Ok(x.1)
+    let #(number_string, number) = x
+    case string.starts_with(string, number_string) {
+      True -> Ok(number)
       False -> Error(Nil)
     }
   })
@@ -98,8 +99,9 @@ fn parse_number_right(string: String) -> Result(Int, Nil) {
 
 fn parse_number_string_right(string: String) -> Result(Int, Nil) {
   list.find_map(string_to_int, fn(x) {
-    case string.ends_with(string, x.0) {
-      True -> Ok(x.1)
+    let #(number_string, number) = x
+    case string.ends_with(string, number_string) {
+      True -> Ok(number)
       False -> Error(Nil)
     }
   })
