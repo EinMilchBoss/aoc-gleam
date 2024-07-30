@@ -38,7 +38,7 @@ fn run_fake(
   |> string_builder.append(part)
   |> string_builder.append(" (fake): ")
   |> string_builder.append(result)
-  |> string_builder.append("(Result: ")
+  |> string_builder.append(" (Result: ")
   |> string_builder.append(test_result)
   |> string_builder.append(")")
   |> string_builder.to_string()
