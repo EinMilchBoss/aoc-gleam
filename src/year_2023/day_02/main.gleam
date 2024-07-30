@@ -44,7 +44,11 @@ fn solve_part_one(input: String) -> String {
 fn solve_part_two(input: String) -> String {
   input
   |> parse_games()
-  |> list.map(fn(game) { min_possible(game.sets) |> set_power() })
+  |> list.map(fn(game) {
+    game.sets
+    |> min_possible()
+    |> set_power()
+  })
   |> list.fold(0, int.add)
   |> int.to_string()
 }
