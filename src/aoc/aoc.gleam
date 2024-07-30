@@ -5,15 +5,15 @@ import gleam/order
 import gleam/string
 import gleam/string_builder
 
-pub fn run_fake1(part: Part, expected: String) -> String {
+pub fn run_fake_one(part: Part, expected: String) -> String {
   run_fake(part, expected, input.fake_one)
 }
 
-pub fn run_fake2(part: Part, expected: String) -> String {
+pub fn run_fake_two(part: Part, expected: String) -> String {
   run_fake(part, expected, input.fake_two)
 }
 
-pub fn run_fake(
+fn run_fake(
   part: Part,
   expected: String,
   get_fake: fn(Input) -> String,

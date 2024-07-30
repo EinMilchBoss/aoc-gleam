@@ -18,10 +18,10 @@ pub fn main() {
   let one = part.one(input, solve_part_one)
   let two = part.two(input, solve_part_two)
 
-  io.println(aoc.run_fake1(one, "142"))
+  io.println(aoc.run_fake_one(one, "142"))
   io.println(aoc.run_real(one))
 
-  io.println(aoc.run_fake2(two, "281"))
+  io.println(aoc.run_fake_two(two, "281"))
   io.println(aoc.run_real(two))
 }
 
