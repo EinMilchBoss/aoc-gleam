@@ -30,8 +30,8 @@ pub fn main() {
 fn solve_part_one(input: String) -> String {
   string.split(input, "\n")
   |> list.map(parse_line)
-  |> list.fold(0, fn(acc, x) { acc + x })
-  |> int.to_string
+  |> list.fold(0, int.add)
+  |> int.to_string()
 }
 
 fn solve_part_two(input: String) -> String {
