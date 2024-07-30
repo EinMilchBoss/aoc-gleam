@@ -13,8 +13,6 @@ const string_to_int = [
 ]
 
 pub fn main() {
-  // Part one will fail, unless you use the fake
-  // input provided by Advent of Code for that part.
   let input = input.read(2023, 1)
 
   let one = part.one(input, solve_part_one)
