@@ -1,7 +1,7 @@
 import gleam/int
 import gleam/io
 import gleam/string
-import gleam/string_builder
+import gleam/string_builder as sb
 import plinth/node/process
 import simplifile
 
@@ -37,11 +37,14 @@ fn read_or_exit(file: String) -> String {
   case simplifile.read(file) {
     Ok(content) -> content
     Error(error) -> {
-      string_builder.new()
-      |> string_builder.append("Could not load input file.\n")
-      |> string_builder.append(simplifile.describe_error(error))
-      |> string_builder.to_string()
-      |> io.print_error()
+      sb.new()
+      |> sb.append("Could not load input file \"")
+      |> sb.append(file)
+      |> sb.append("\".\nReason: ")
+      |> sb.append(simplifile.describe_error(error))
+      |> sb.append(".")
+      |> sb.to_string()
+      |> io.println_error()
       process.exit(1)
       panic
     }
