@@ -1,15 +1,27 @@
-import aoc/input
+import aoc/input.{type Input}
 import aoc/part.{type Part}
 import gleam/int
 import gleam/order
 import gleam/string
 import gleam/string_builder
 
-pub fn run_fake(part: Part, expected: String) -> String {
+pub fn run_fake1(part: Part, expected: String) -> String {
+  run_fake(part, expected, input.fake_one)
+}
+
+pub fn run_fake2(part: Part, expected: String) -> String {
+  run_fake(part, expected, input.fake_two)
+}
+
+pub fn run_fake(
+  part: Part,
+  expected: String,
+  get_fake: fn(Input) -> String,
+) -> String {
   let result =
     part
     |> part.input()
-    |> input.fake()
+    |> get_fake()
     |> part.solution(part)
   let part =
     part
@@ -26,8 +38,9 @@ pub fn run_fake(part: Part, expected: String) -> String {
   |> string_builder.append(part)
   |> string_builder.append(" (fake): ")
   |> string_builder.append(result)
-  |> string_builder.append("\nResult: ")
+  |> string_builder.append("(Result: ")
   |> string_builder.append(test_result)
+  |> string_builder.append(")")
   |> string_builder.to_string()
 }
 

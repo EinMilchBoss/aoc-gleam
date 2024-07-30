@@ -6,25 +6,31 @@ import plinth/node/process
 import simplifile
 
 pub opaque type Input {
-  Input(fake: String, real: String)
+  Input(fake_one: String, fake_two: String, real: String)
 }
 
-pub fn fake(input: Input) {
-  input.fake
+pub fn fake_one(input: Input) -> String {
+  input.fake_one
 }
 
-pub fn real(input: Input) {
+pub fn fake_two(input: Input) -> String {
+  input.fake_two
+}
+
+pub fn real(input: Input) -> String {
   input.real
 }
 
 pub fn read(year: Int, day: Int) -> Input {
   let year = int.to_string(year) |> string.pad_left(4, "0")
   let day = int.to_string(day) |> string.pad_left(2, "0")
+  let fake_one =
+    read_or_exit("./res/year_" <> year <> "/day_" <> day <> "/fake_one.txt")
+  let fake_two =
+    read_or_exit("./res/year_" <> year <> "/day_" <> day <> "/fake_two.txt")
   let real =
     read_or_exit("./res/year_" <> year <> "/day_" <> day <> "/real.txt")
-  let fake =
-    read_or_exit("./res/year_" <> year <> "/day_" <> day <> "/fake.txt")
-  Input(fake, real)
+  Input(fake_one, fake_two, real)
 }
 
 fn read_or_exit(file: String) -> String {
