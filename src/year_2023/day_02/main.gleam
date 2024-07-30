@@ -18,9 +18,13 @@ pub fn main() {
   let input = input.read(2023, 2)
 
   let one = part.one(input, solve_part_one)
+  let two = part.two(input, solve_part_two)
 
   io.println(aoc.run_fake_one(one, "8"))
-  // io.println(aoc.run_real(one))
+  io.println(aoc.run_real(one))
+
+  io.println(aoc.run_fake_two(two, "2286"))
+  io.println(aoc.run_real(two))
 }
 
 fn solve_part_one(input: String) -> String {
@@ -37,12 +41,26 @@ fn solve_part_one(input: String) -> String {
   |> int.to_string()
 }
 
-fn is_possible(set: Set, with max: Set) -> Bool {
-  set.r <= max.r && set.g <= max.g && set.b <= max.b
+fn solve_part_two(input: String) -> String {
+  input
+  |> parse_games()
+  |> list.map(fn(game) { min_possible(game.sets) |> set_power() })
+  |> list.fold(0, int.add)
+  |> int.to_string()
 }
 
-fn power(set: Set) -> Int {
+fn min_possible(sets: List(Set)) -> Set {
+  list.fold(sets, Set(0, 0, 0), fn(acc, set) {
+    Set(int.max(acc.r, set.r), int.max(acc.g, set.g), int.max(acc.b, set.b))
+  })
+}
+
+fn set_power(set: Set) -> Int {
   set.r * set.g * set.b
+}
+
+fn is_possible(set: Set, with max: Set) -> Bool {
+  set.r <= max.r && set.g <= max.g && set.b <= max.b
 }
 
 fn parse_games(input: String) -> List(Game) {
