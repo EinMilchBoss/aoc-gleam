@@ -1,14 +1,14 @@
 import aoc/aoc
 import aoc/input
 import aoc/part
-import gleam/function
+import gleam/bool
 import gleam/int
 import gleam/io
 import gleam/iterator
 import gleam/list
 import gleam/order
 import gleam/result
-import gleam/set.{type Set}
+import gleam/set
 import gleam/string
 
 type Part {
@@ -26,52 +26,57 @@ pub fn main() {
   // let two = part.two(input, solve_part_two)
 
   io.println(aoc.run_fake_one(one, "4361"))
-  // io.println(aoc.run_real(one))
+  io.println(aoc.run_real(one))
 }
 
 fn solve_part_one(input: String) -> String {
-  let symbols = find_symbols(input)
-  let parts = find_parts(input)
-  let matches = adjacent_positions(symbols)
+  let symbols = parse_symbol_positions(input)
+  let parts = parse_parts(input)
+  let adjacent_positions = unique_adjacent_positions(symbols)
 
-  let results =
-    parts
-    |> list.filter(fn(part) {
-      part.positions
-      |> list.any(fn(part_pos) {
-        matches
-        |> list.any(fn(match_pos) { part_pos == match_pos })
-      })
+  parts
+  |> list.filter(fn(part) {
+    part.positions
+    |> list.any(fn(part_pos) {
+      adjacent_positions
+      |> list.any(fn(match_pos) { part_pos == match_pos })
     })
-    |> list.fold(0, fn(acc, part) { acc + part.number })
-  int.to_string(results)
+  })
+  |> list.fold(0, fn(acc, part) { acc + part.number })
+  |> int.to_string()
 }
 
-fn adjacent_positions(positions: List(Position)) -> List(Position) {
+fn unique_adjacent_positions(positions: List(Position)) -> List(Position) {
   positions
   |> iterator.from_list()
   |> iterator.flat_map(fn(position) {
     iterator.range(-1, 1)
     |> iterator.flat_map(fn(dy) {
       iterator.range(-1, 1)
-      |> iterator.map(fn(dx) { Position(position.x + dx, position.y + dy) })
+      |> iterator.filter_map(fn(dx) {
+        use <- bool.guard(dx == 0 && dy == 0, Error(Nil))
+
+        Ok(Position(position.x + dx, position.y + dy))
+      })
     })
   })
   |> iterator.to_list()
+  |> set.from_list()
+  |> set.to_list()
 }
 
-fn find_parts(input: String) -> List(Part) {
+fn parse_parts(input: String) -> List(Part) {
   input
   |> string.split("\n")
   |> list.index_map(fn(line, y) {
     line
     |> string.to_graphemes()
-    |> find_parts_in_line(Position(0, y), 0, [], [])
+    |> parse_parts_in_line(Position(0, y), 0, [], [])
   })
   |> list.flatten()
 }
 
-fn find_parts_in_line(
+fn parse_parts_in_line(
   graphemes: List(String),
   position: Position,
   part_number: Int,
@@ -82,7 +87,7 @@ fn find_parts_in_line(
     [] -> acc
     [current, ..rest] -> {
       let next = fn(part_number, part_positions, acc) {
-        find_parts_in_line(
+        parse_parts_in_line(
           rest,
           Position(..position, x: position.x + 1),
           part_number,
@@ -108,25 +113,36 @@ fn find_parts_in_line(
   }
 }
 
-fn find_symbols(input: String) -> List(Position) {
+fn parse_symbol_positions(input: String) -> List(Position) {
   input
   |> string.split("\n")
-  |> list.index_map(fn(line, y) {
+  |> iterator.from_list()
+  |> iterator.index()
+  |> iterator.flat_map(fn(line_y) {
+    let #(line, y) = line_y
+
     line
     |> string.to_graphemes()
-    |> list.index_map(fn(grapheme, x) {
-      let is_empty = string.compare(grapheme, ".") == order.Eq
-      let is_digit =
-        grapheme
-        |> int.parse()
-        |> result.is_ok()
+    |> iterator.from_list()
+    |> iterator.index()
+    |> iterator.filter_map(fn(grapheme_x) {
+      let #(grapheme, x) = grapheme_x
 
-      case !is_empty && !is_digit {
+      case !is_empty(grapheme) && !is_number(grapheme) {
         True -> Ok(Position(x, y))
         False -> Error(Nil)
       }
     })
   })
-  |> list.flatten()
-  |> list.filter_map(function.identity)
+  |> iterator.to_list()
+}
+
+fn is_number(grapheme: String) -> Bool {
+  grapheme
+  |> int.parse()
+  |> result.is_ok()
+}
+
+fn is_empty(grapheme: String) -> Bool {
+  string.compare(grapheme, ".") == order.Eq
 }
