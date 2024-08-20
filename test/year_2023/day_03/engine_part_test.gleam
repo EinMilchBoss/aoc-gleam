@@ -9,7 +9,7 @@ pub fn end_test() {
 
   let actual = engine_part.end(engine_part)
 
-  actual |> should.equal(expected)
+  should.equal(actual, expected)
 }
 
 pub fn parse_one_test() {
@@ -18,7 +18,7 @@ pub fn parse_one_test() {
 
   let actual = engine_part.parse(input)
 
-  actual |> should.equal(expected)
+  should.equal(actual, expected)
 }
 
 pub fn parse_one_with_padding_test() {
@@ -27,7 +27,7 @@ pub fn parse_one_with_padding_test() {
 
   let actual = engine_part.parse(input)
 
-  actual |> should.equal(expected)
+  should.equal(actual, expected)
 }
 
 pub fn parse_multiple_test() {
@@ -39,7 +39,7 @@ pub fn parse_multiple_test() {
 
   let actual = engine_part.parse(input)
 
-  actual |> should.equal(expected)
+  should.equal(actual, expected)
 }
 
 pub fn parse_multiple_with_padding_test() {
@@ -51,5 +51,5 @@ pub fn parse_multiple_with_padding_test() {
 
   let actual = engine_part.parse(input)
 
-  actual |> should.equal(expected)
+  should.equal(actual, expected)
 }
