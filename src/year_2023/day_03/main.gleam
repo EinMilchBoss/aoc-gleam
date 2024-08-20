@@ -1,42 +1,38 @@
 import aoc/aoc
 import aoc/input
 import aoc/part
-import gleam/bool
+import gleam/dict.{type Dict}
 import gleam/int
 import gleam/io
-import gleam/iterator
 import gleam/list
-import gleam/order
-import gleam/result
-import gleam/set
-import gleam/string
+import gleam/set.{type Set}
 
-type Part {
-  Part(number: Int, positions: List(Position))
-}
-
-type Position {
-  Position(x: Int, y: Int)
-}
+import year_2023/day_03/engine_part.{type EnginePart}
+import year_2023/day_03/gear
+import year_2023/day_03/position.{type Position}
+import year_2023/day_03/symbol
 
 pub fn main() {
   let input = input.read(2023, 3)
 
   let one = part.one(input, solve_part_one)
-  // let two = part.two(input, solve_part_two)
+  let two = part.two(input, solve_part_two)
 
-  io.println(aoc.run_fake_one(one, "4361"))
-  io.println(aoc.run_real(one))
+  // io.println(aoc.run_fake_one(one, "4361"))
+  // io.println(aoc.run_real(one))
+
+  io.println(aoc.run_fake_two(two, "467835"))
+  io.println(aoc.run_real(two))
 }
 
 fn solve_part_one(input: String) -> String {
-  let symbols = parse_symbol_positions(input)
-  let parts = parse_parts(input)
-  let adjacent_positions = unique_adjacent_positions(symbols)
+  let parts = engine_part.parse(input)
+  let symbol_positions = symbol.parse_positions(input)
+  let adjacent_positions = list.flat_map(symbol_positions, position.adjacent)
 
   parts
   |> list.filter(fn(part) {
-    part.positions
+    engine_part.positions(part)
     |> list.any(fn(part_pos) {
       adjacent_positions
       |> list.any(fn(match_pos) { part_pos == match_pos })
@@ -46,103 +42,56 @@ fn solve_part_one(input: String) -> String {
   |> int.to_string()
 }
 
-fn unique_adjacent_positions(positions: List(Position)) -> List(Position) {
-  positions
-  |> iterator.from_list()
-  |> iterator.flat_map(fn(position) {
-    iterator.range(-1, 1)
-    |> iterator.flat_map(fn(dy) {
-      iterator.range(-1, 1)
-      |> iterator.filter_map(fn(dx) {
-        use <- bool.guard(dx == 0 && dy == 0, Error(Nil))
-
-        Ok(Position(position.x + dx, position.y + dy))
-      })
+fn solve_part_two(input: String) -> String {
+  let gear_positions = gear.parse_positions(input)
+  let engine_parts =
+    input
+    |> engine_part.parse()
+    |> list.map(fn(engine_part) {
+      #(engine_part, engine_part.positions(engine_part) |> set.from_list())
     })
-  })
-  |> iterator.to_list()
-  |> set.from_list()
-  |> set.to_list()
+    |> dict.from_list()
+
+  io.debug(engine_parts)
+
+  recurse(gear_positions, engine_parts, [])
+  |> list.fold(0, int.add)
+  |> int.to_string()
 }
 
-fn parse_parts(input: String) -> List(Part) {
-  input
-  |> string.split("\n")
-  |> list.index_map(fn(line, y) {
-    line
-    |> string.to_graphemes()
-    |> parse_parts_in_line(Position(0, y), 0, [], [])
-  })
-  |> list.flatten()
-}
-
-fn parse_parts_in_line(
-  graphemes: List(String),
-  position: Position,
-  part_number: Int,
-  part_positions: List(Position),
-  acc: List(Part),
-) -> List(Part) {
-  case graphemes {
+fn recurse(
+  gear_positions: List(Position),
+  engine_parts: Dict(EnginePart, Set(Position)),
+  acc: List(Int),
+) -> List(Int) {
+  case gear_positions {
     [] -> acc
-    [current, ..rest] -> {
-      let next = fn(part_number, part_positions, acc) {
-        parse_parts_in_line(
-          rest,
-          Position(..position, x: position.x + 1),
-          part_number,
-          part_positions,
-          acc,
-        )
-      }
+    [gear_position, ..remaining_gear_positions] -> {
+      let gear_adjacent_positions =
+        gear_position
+        |> position.adjacent()
+        |> set.from_list()
 
-      case int.parse(current) {
-        Ok(current_number) -> {
-          next(
-            10 * part_number + current_number,
-            [position, ..part_positions],
-            acc,
-          )
+      let matches =
+        engine_parts
+        |> dict.filter(fn(_, positions) {
+          !set.is_disjoint(positions, gear_adjacent_positions)
+        })
+
+      case dict.size(matches) {
+        2 -> {
+          let assert [#(first, _), #(second, _)] = dict.to_list(matches)
+
+          // Assumption: No part is being used twice.
+          let engine_parts = dict.drop(engine_parts, dict.keys(matches))
+
+          recurse(remaining_gear_positions, engine_parts, [
+            gear.ratio(first, second),
+            ..acc
+          ])
         }
-        Error(_) if part_number > 0 -> {
-          next(0, [], [Part(part_number, part_positions), ..acc])
-        }
-        Error(_) -> next(0, [], acc)
+        _ -> recurse(remaining_gear_positions, engine_parts, acc)
       }
     }
   }
-}
-
-fn parse_symbol_positions(input: String) -> List(Position) {
-  input
-  |> string.split("\n")
-  |> iterator.from_list()
-  |> iterator.index()
-  |> iterator.flat_map(fn(line_y) {
-    let #(line, y) = line_y
-
-    line
-    |> string.to_graphemes()
-    |> iterator.from_list()
-    |> iterator.index()
-    |> iterator.filter_map(fn(grapheme_x) {
-      let #(grapheme, x) = grapheme_x
-
-      case !is_empty(grapheme) && !is_number(grapheme) {
-        True -> Ok(Position(x, y))
-        False -> Error(Nil)
-      }
-    })
-  })
-  |> iterator.to_list()
-}
-
-fn is_number(grapheme: String) -> Bool {
-  grapheme
-  |> int.parse()
-  |> result.is_ok()
-}
-
-fn is_empty(grapheme: String) -> Bool {
-  string.compare(grapheme, ".") == order.Eq
 }
