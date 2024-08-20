@@ -18,8 +18,8 @@ pub fn main() {
   let one = part.one(input, solve_part_one)
   let two = part.two(input, solve_part_two)
 
-  // io.println(aoc.run_fake_one(one, "4361"))
-  // io.println(aoc.run_real(one))
+  io.println(aoc.run_fake_one(one, "4361"))
+  io.println(aoc.run_real(one))
 
   io.println(aoc.run_fake_two(two, "467835"))
   io.println(aoc.run_real(two))
@@ -44,7 +44,7 @@ fn solve_part_one(input: String) -> String {
 
 fn solve_part_two(input: String) -> String {
   let gear_positions = gear.parse_positions(input)
-  let engine_parts =
+  let engine_part_to_positions =
     input
     |> engine_part.parse()
     |> list.map(fn(engine_part) {
@@ -52,14 +52,12 @@ fn solve_part_two(input: String) -> String {
     })
     |> dict.from_list()
 
-  io.debug(engine_parts)
-
-  recurse(gear_positions, engine_parts, [])
+  gear_ratios(gear_positions, engine_part_to_positions, [])
   |> list.fold(0, int.add)
   |> int.to_string()
 }
 
-fn recurse(
+fn gear_ratios(
   gear_positions: List(Position),
   engine_parts: Dict(EnginePart, Set(Position)),
   acc: List(Int),
@@ -85,12 +83,12 @@ fn recurse(
           // Assumption: No part is being used twice.
           let engine_parts = dict.drop(engine_parts, dict.keys(matches))
 
-          recurse(remaining_gear_positions, engine_parts, [
+          gear_ratios(remaining_gear_positions, engine_parts, [
             gear.ratio(first, second),
             ..acc
           ])
         }
-        _ -> recurse(remaining_gear_positions, engine_parts, acc)
+        _ -> gear_ratios(remaining_gear_positions, engine_parts, acc)
       }
     }
   }
