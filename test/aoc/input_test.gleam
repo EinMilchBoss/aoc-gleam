@@ -9,11 +9,11 @@ const success = "SUCCESS"
 const failure = simplifile.Unknown("FAILURE")
 
 pub fn do_read_files_correct_files_test() {
-  let assert Ok(actual) = input.do_read_files(year: 2024, day: 10, with: Ok(_))
+  let assert Ok(actual) = input.do_read_files(year: 1000, day: 10, with: Ok(_))
 
-  should.equal(input.fake_one(actual), "./res/year_2024/day_10/fake_one.txt")
-  should.equal(input.fake_two(actual), "./res/year_2024/day_10/fake_two.txt")
-  should.equal(input.real(actual), "./res/year_2024/day_10/real.txt")
+  should.equal(input.fake_one(actual), "./res/year_1000/day_10/fake_one.txt")
+  should.equal(input.fake_two(actual), "./res/year_1000/day_10/fake_two.txt")
+  should.equal(input.real(actual), "./res/year_1000/day_10/real.txt")
 }
 
 pub fn do_read_files_with_padding_test() {
@@ -31,10 +31,10 @@ pub fn do_read_files_with_padding_test() {
 
 pub fn do_read_files_first_file_error_test() {
   let expected =
-    input.ReadError(file: "./res/year_2024/day_10/fake_one.txt", cause: failure)
+    input.ReadError(file: "./res/year_1000/day_10/fake_one.txt", cause: failure)
 
   let assert Error(actual) =
-    input.do_read_files(year: 2024, day: 10, with: fn(file) {
+    input.do_read_files(year: 1000, day: 10, with: fn(file) {
       case filepath.base_name(file) {
         "fake_one.txt" -> Error(failure)
         "fake_two.txt" -> Ok(success)
@@ -48,10 +48,10 @@ pub fn do_read_files_first_file_error_test() {
 
 pub fn read_files_last_file_error_test() {
   let expected =
-    input.ReadError(file: "./res/year_2024/day_10/real.txt", cause: failure)
+    input.ReadError(file: "./res/year_1000/day_10/real.txt", cause: failure)
 
   let assert Error(actual) =
-    input.do_read_files(year: 2024, day: 10, with: fn(file) {
+    input.do_read_files(year: 1000, day: 10, with: fn(file) {
       case filepath.base_name(file) {
         "fake_one.txt" -> Ok(success)
         "fake_two.txt" -> Ok(success)
