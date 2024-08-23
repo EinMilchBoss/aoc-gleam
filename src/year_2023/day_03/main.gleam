@@ -13,7 +13,7 @@ import year_2023/day_03/position.{type Position}
 import year_2023/day_03/symbol
 
 pub fn main() {
-  let input = input.read_files(2023, 3)
+  let input = input.read_files(year: 2023, day: 3)
 
   let one = part.one(input, solve_part_one)
   let two = part.two(input, solve_part_two)

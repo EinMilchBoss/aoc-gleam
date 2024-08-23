@@ -15,7 +15,7 @@ type Set {
 }
 
 pub fn main() {
-  let input = input.read_files(2023, 2)
+  let input = input.read_files(year: 2023, day: 2)
 
   let one = part.one(input, solve_part_one)
   let two = part.two(input, solve_part_two)
