@@ -46,7 +46,7 @@ pub fn do_read_files_first_file_error_test() {
   should.equal(actual, expected)
 }
 
-pub fn read_files_last_file_error_test() {
+pub fn do_read_files_last_file_error_test() {
   let expected =
     input.ReadError(file: "./res/year_1000/day_10/real.txt", cause: failure)
 
@@ -63,7 +63,7 @@ pub fn read_files_last_file_error_test() {
   should.equal(actual, expected)
 }
 
-pub fn read_files_multiple_error_test() {
+pub fn do_read_files_multiple_error_test() {
   let expected =
     input.ReadError(file: "./res/year_2024/day_10/fake_one.txt", cause: failure)
 
