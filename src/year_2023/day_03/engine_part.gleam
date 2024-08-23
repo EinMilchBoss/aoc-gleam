@@ -4,7 +4,7 @@ import gleam/list
 import gleam/set.{type Set}
 import gleam/string
 
-import year_2023/day_03/position.{type Position}
+import year_2023/day_03/position.{type Position, Position}
 
 pub type EnginePart {
   EnginePart(number: Int, y: Int, start: Int, length: Int)
@@ -64,7 +64,7 @@ fn parse_line(
 
 pub fn positions(engine_part: EnginePart) -> List(Position) {
   x_range(engine_part)
-  |> iterator.map(fn(x) { position.Position(x, engine_part.y) })
+  |> iterator.map(fn(x) { Position(x, engine_part.y) })
   |> iterator.to_list()
 }
 
@@ -74,23 +74,19 @@ pub fn adjacent_positions(engine_part: EnginePart) -> Set(Position) {
 
   let left =
     iterator.range(-1, 1)
-    |> iterator.map(fn(dy) {
-      position.Position(leftmost - 1, engine_part.y + dy)
-    })
+    |> iterator.map(fn(dy) { Position(leftmost - 1, engine_part.y + dy) })
 
   let right =
     iterator.range(-1, 1)
-    |> iterator.map(fn(dy) {
-      position.Position(rightmost + 1, engine_part.y + dy)
-    })
+    |> iterator.map(fn(dy) { Position(rightmost + 1, engine_part.y + dy) })
 
   let above =
     x_range(engine_part)
-    |> iterator.map(fn(x) { position.Position(x, engine_part.y + 1) })
+    |> iterator.map(fn(x) { Position(x, engine_part.y + 1) })
 
   let below =
     x_range(engine_part)
-    |> iterator.map(fn(x) { position.Position(x, engine_part.y - 1) })
+    |> iterator.map(fn(x) { Position(x, engine_part.y - 1) })
 
   left
   |> iterator.append(right)
