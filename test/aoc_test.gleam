@@ -1,8 +1,9 @@
+import gleam/function
+import gleeunit/should
+
 import aoc
 import aoc/input
 import aoc/part
-import gleam/function
-import gleeunit/should
 
 const success = "SUCCESS"
 

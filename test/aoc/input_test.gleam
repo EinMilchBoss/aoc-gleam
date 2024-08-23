@@ -1,7 +1,8 @@
-import aoc/input
 import filepath
 import gleeunit/should
 import simplifile
+
+import aoc/input
 
 const success = "SUCCESS"
 
