@@ -7,7 +7,7 @@ const success = "SUCCESS"
 
 const failure = simplifile.Unknown("FAILURE")
 
-pub fn read_correct_files_test() {
+pub fn read_files_correct_files_test() {
   let assert Ok(actual) = input.do_read_files(year: 2024, day: 10, with: Ok(_))
 
   should.equal(input.fake_one(actual), "./res/year_2024/day_10/fake_one.txt")
@@ -15,7 +15,7 @@ pub fn read_correct_files_test() {
   should.equal(input.real(actual), "./res/year_2024/day_10/real.txt")
 }
 
-pub fn read_with_padding_test() {
+pub fn read_files_with_padding_test() {
   let expected_year = "year_0001"
   let expected_day = "day_01"
 
@@ -28,7 +28,7 @@ pub fn read_with_padding_test() {
   should.equal(actual_day, expected_day)
 }
 
-pub fn read_first_file_error_test() {
+pub fn read_files_first_file_error_test() {
   let expected =
     input.ReadError(file: "./res/year_2024/day_10/fake_one.txt", cause: failure)
 
@@ -45,7 +45,7 @@ pub fn read_first_file_error_test() {
   should.equal(actual, expected)
 }
 
-pub fn read_last_file_error_test() {
+pub fn read_files_last_file_error_test() {
   let expected =
     input.ReadError(file: "./res/year_2024/day_10/real.txt", cause: failure)
 
@@ -62,7 +62,7 @@ pub fn read_last_file_error_test() {
   should.equal(actual, expected)
 }
 
-pub fn read_multiple_error_test() {
+pub fn read_files_multiple_error_test() {
   let expected =
     input.ReadError(file: "./res/year_2024/day_10/fake_one.txt", cause: failure)
 
