@@ -1,4 +1,4 @@
-import aoc/aoc
+import aoc
 import aoc/input
 import aoc/part
 import gleam/function
