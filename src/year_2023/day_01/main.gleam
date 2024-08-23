@@ -13,7 +13,7 @@ const string_to_int = [
 ]
 
 pub fn main() {
-  let input = input.read(2023, 1)
+  let input = input.read_files(2023, 1)
 
   let one = part.one(input, solve_part_one)
   let two = part.two(input, solve_part_two)
