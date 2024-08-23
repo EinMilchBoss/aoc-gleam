@@ -5,11 +5,16 @@ pub opaque type Part {
 }
 
 pub fn one(input: Input, solution: fn(String) -> String) -> Part {
-  Part(1, input, solution)
+  Part(1, input:, solution:)
 }
 
 pub fn two(input: Input, solution: fn(String) -> String) -> Part {
-  Part(2, input, solution)
+  Part(2, input:, solution:)
+}
+
+@internal
+pub fn new(number: Int, input: Input, solution: fn(String) -> String) -> Part {
+  Part(number:, input:, solution:)
 }
 
 pub fn number(part: Part) -> Int {

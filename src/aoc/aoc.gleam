@@ -5,23 +5,24 @@ import gleam/order
 import gleam/string
 import gleam/string_builder as sb
 
-pub fn run_fake_one(part: Part, expected: String) -> String {
-  run_fake(part, expected, input.fake_one)
+pub fn run_fake_one(part: Part, expected expected: String) -> String {
+  run_fake(part, expected:, with: input.fake_one)
 }
 
-pub fn run_fake_two(part: Part, expected: String) -> String {
-  run_fake(part, expected, input.fake_two)
+pub fn run_fake_two(part: Part, expected expected: String) -> String {
+  run_fake(part, expected:, with: input.fake_two)
 }
 
-fn run_fake(
+@internal
+pub fn run_fake(
   part: Part,
-  expected: String,
-  get_fake: fn(Input) -> String,
+  expected expected: String,
+  with fake: fn(Input) -> String,
 ) -> String {
   let result =
     part
     |> part.input()
-    |> get_fake()
+    |> fake()
     |> part.solution(part)
   let part =
     part
