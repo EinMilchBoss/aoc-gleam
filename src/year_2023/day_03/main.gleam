@@ -1,12 +1,12 @@
-import aoc
-import aoc/input
-import aoc/part
 import gleam/dict.{type Dict}
 import gleam/int
 import gleam/io
 import gleam/list
 import gleam/set.{type Set}
 
+import aoc
+import aoc/input
+import aoc/part
 import year_2023/day_03/engine_part.{type EnginePart}
 import year_2023/day_03/gear
 import year_2023/day_03/position.{type Position}
