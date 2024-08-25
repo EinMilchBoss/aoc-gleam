@@ -1,15 +1,31 @@
 import gleam/int
+import gleam/io
+import gleam/list
 import gleam/set.{type Set}
 import gleam/string
 
 pub type Card {
-  Card(winning: Set(Int), owned: Set(Int))
+  Card(number: Int, winning: Set(Int), owned: Set(Int))
+}
+
+@internal
+pub fn numbers(cards: List(Card)) -> List(Int) {
+  cards |> list.map(fn(card) { card.number })
 }
 
 pub fn from_line(line line: String) -> Card {
-  let assert [_, numbers] = string.split(line, on: ": ")
-  let assert [winning, owned] = string.split(numbers, on: " | ")
-  Card(parse_numbers(winning), parse_numbers(owned))
+  let assert [front, back] = string.split(line, on: ": ")
+
+  let assert [_, number, ..] =
+    string.split(front, on: " ")
+    |> list.filter(fn(string) { !string.is_empty(string) })
+  let assert Ok(number) = number |> string.trim() |> int.parse()
+
+  let assert [winning, owned] = string.split(back, on: " | ")
+  let winning = parse_numbers(winning)
+  let owned = parse_numbers(owned)
+
+  Card(number:, winning:, owned:)
 }
 
 fn parse_numbers(numbers: String) -> Set(Int) {
