@@ -8,11 +8,6 @@ pub type Card {
   Card(number: Int, winning: Set(Int), owned: Set(Int))
 }
 
-@internal
-pub fn numbers(cards: List(Card)) -> List(Int) {
-  cards |> list.map(fn(card) { card.number })
-}
-
 pub fn from_line(line line: String) -> Card {
   let assert [front, back] = string.split(line, on: ": ")
 
@@ -48,4 +43,8 @@ fn do_parse_numbers(from numbers: String, into acc: Set(Int)) -> Set(Int) {
         into: set.insert(into: acc, this: number),
       )
   }
+}
+
+pub fn wins(of card: Card) -> Int {
+  set.intersection(of: card.winning, and: card.owned) |> set.size()
 }
