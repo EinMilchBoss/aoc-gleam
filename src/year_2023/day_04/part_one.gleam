@@ -1,8 +1,6 @@
 import gleam/float
 import gleam/int
 import gleam/list
-import gleam/result
-import gleam/set
 import gleam/string
 
 import year_2023/day_04/card
@@ -14,22 +12,17 @@ pub fn solve(input: String) -> String {
     |> list.map(card.from_line)
 
   cards
-  |> list.fold(0, fn(acc, card) {
-    let points =
-      points(set.intersection(of: card.winning, and: card.owned) |> set.size())
-    acc + points
-  })
+  |> list.fold(0, fn(acc, card) { acc + points(from_wins: card.wins(of: card)) })
   |> int.to_string()
 }
 
-fn points(matches: Int) -> Int {
-  case matches {
+fn points(from_wins wins: Int) -> Int {
+  case wins {
     0 -> 0
     _ -> {
-      let assert Ok(power) =
-        int.power(2, of: int.to_float(matches) -. 1.0)
-        |> result.map(float.truncate)
-      power
+      let exponent = int.to_float(wins) -. 1.0
+      let assert Ok(power) = 2 |> int.power(of: exponent)
+      power |> float.truncate()
     }
   }
 }
