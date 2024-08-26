@@ -11,7 +11,7 @@ pub fn main() {
   let one = part.one(input, part_one.solve)
   // let two = part.two(input, part_two.solve)
 
-  io.println(aoc.run_fake_one(one, "0"))
+  io.println(aoc.run_fake_one(one, "35"))
   io.println(aoc.run_real(one))
   // io.println(aoc.run_fake_two(two, "0"))
   // io.println(aoc.run_real(two))
