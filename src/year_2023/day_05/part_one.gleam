@@ -8,7 +8,23 @@ pub fn solve(input: String) -> String {
 
   io.debug(almanac)
 
-  "Nothing"
+  let assert Ok(smallest_location) =
+    translate_seeds(almanac) |> list.reduce(int.min)
+  int.to_string(smallest_location)
+}
+
+fn translate_seeds(almanac: Almanac) -> List(Int) {
+  almanac.maps
+  |> list.fold(almanac.seeds, fn(acc, map) {
+    list.map(acc, translate_seed(map, _))
+  })
+}
+
+fn translate_seed(map: Map, seed: Int) -> Int {
+  case list.find(map.entries, contains(_, seed)) {
+    Error(_) -> seed
+    Ok(entry) -> translate(entry, seed)
+  }
 }
 
 type Almanac {
@@ -19,8 +35,16 @@ type Map {
   Map(entries: List(Entry))
 }
 
-type Entry {
+pub type Entry {
   Entry(destination: Int, source: Int, length: Int)
+}
+
+pub fn contains(entry: Entry, x: Int) -> Bool {
+  entry.source <= x && x < entry.source + entry.length
+}
+
+pub fn translate(entry: Entry, x: Int) -> Int {
+  x - entry.source + entry.destination
 }
 
 /// # Format
