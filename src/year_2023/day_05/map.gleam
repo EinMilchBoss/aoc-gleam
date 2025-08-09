@@ -25,8 +25,8 @@ pub fn from_string(input: String) -> Map {
 }
 
 pub fn translate(map: Map, seed: Int) -> Int {
-  case list.find(map.entries, entry.contains(_, seed)) {
+  case map.entries |> list.find(entry.contains(_, seed)) {
     Error(_) -> seed
-    Ok(entry) -> entry.translate(entry, seed)
+    Ok(entry) -> entry |> entry.translate(seed)
   }
 }
