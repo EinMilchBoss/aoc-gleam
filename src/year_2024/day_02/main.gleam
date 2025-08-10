@@ -34,18 +34,18 @@ fn part_two(input: String) -> String {
   let increasing =
     reports
     |> list.count(fn(report) {
-      permutate_report(report) |> list.any(are_all_increasing)
+      combine_report(report) |> list.any(are_all_increasing)
     })
   let decreasing =
     reports
     |> list.count(fn(report) {
-      permutate_report(report) |> list.any(are_all_decreasing)
+      combine_report(report) |> list.any(are_all_decreasing)
     })
 
   int.to_string(increasing + decreasing)
 }
 
-fn permutate_report(report: List(Int)) -> List(List(Int)) {
+fn combine_report(report: List(Int)) -> List(List(Int)) {
   let length = list.length(report)
   list.combinations(report, length - 1)
 }
