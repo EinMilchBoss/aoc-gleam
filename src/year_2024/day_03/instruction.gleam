@@ -15,19 +15,19 @@ pub fn parse(input: String) -> List(Instruction) {
     regexp.compile("mul\\((\\d+),(\\d+)\\)|do\\(\\)|don't\\(\\)", options)
   let matches = regexp.scan(re, input)
 
-  do_parse_instructions(matches, []) |> list.reverse()
+  do_parse(matches, []) |> list.reverse()
 }
 
-fn do_parse_instructions(matches: List(regexp.Match), acc: List(Instruction)) {
+fn do_parse(matches: List(regexp.Match), acc: List(Instruction)) {
   case matches {
     [] -> acc
     [match, ..rest] -> {
       case match.content {
-        "do()" -> do_parse_instructions(rest, [Enable, ..acc])
-        "don't()" -> do_parse_instructions(rest, [Disable, ..acc])
+        "do()" -> do_parse(rest, [Enable, ..acc])
+        "don't()" -> do_parse(rest, [Disable, ..acc])
         _ -> {
           let #(left, right) = submatches.parse(match.submatches)
-          do_parse_instructions(rest, [Multiply(left:, right:), ..acc])
+          do_parse(rest, [Multiply(left:, right:), ..acc])
         }
       }
     }
@@ -42,10 +42,10 @@ pub fn to_pair(instruction: Instruction) -> Result(#(Int, Int), Nil) {
 }
 
 pub fn reduce(instructions: List(Instruction)) -> List(Instruction) {
-  do_reduce_instructions(instructions, True, [])
+  do_reduce(instructions, True, [])
 }
 
-fn do_reduce_instructions(
+fn do_reduce(
   instructions: List(Instruction),
   is_enabled: Bool,
   acc: List(Instruction),
@@ -54,16 +54,15 @@ fn do_reduce_instructions(
     _, [] -> acc
     True, [instruction, ..rest] -> {
       case instruction {
-        Multiply(_, _) ->
-          do_reduce_instructions(rest, True, [instruction, ..acc])
-        Enable -> do_reduce_instructions(rest, True, acc)
-        Disable -> do_reduce_instructions(rest, False, acc)
+        Multiply(_, _) -> do_reduce(rest, True, [instruction, ..acc])
+        Enable -> do_reduce(rest, True, acc)
+        Disable -> do_reduce(rest, False, acc)
       }
     }
     False, [instruction, ..rest] -> {
       case instruction {
-        Enable -> do_reduce_instructions(rest, True, acc)
-        _ -> do_reduce_instructions(rest, False, acc)
+        Enable -> do_reduce(rest, True, acc)
+        _ -> do_reduce(rest, False, acc)
       }
     }
   }
