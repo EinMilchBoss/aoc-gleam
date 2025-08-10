@@ -4,7 +4,7 @@ import gleam/pair
 import gleam/result
 import gleam/string
 
-import year_2023/day_05/entry.{type EntryRanges}
+import year_2023/day_05/entry.{type Entry, type EntryRanges}
 import year_2023/day_05/map.{type Map}
 import year_2023/day_05/range.{type Range, Range}
 
@@ -70,58 +70,34 @@ pub fn translate_seeds(almanac: Almanac) -> List(Int) {
 /// ▼  ▼  ▼        ▼   ▼        ▼           ▼         ▼  ▼ 
 /// ```
 pub fn translate_seed_ranges(almanac: Almanac) {
-  let seed_ranges = seed_ranges(almanac)
+  let input_ranges = seed_ranges(almanac)
 
-  list.fold(almanac.maps, seed_ranges, fn(acc, map) {
-    list.fold(acc, [], fn(_output_ranges, input_range) {
-      let entry_ranges_of_map = list.map(map.entries, entry.to_entry_ranges)
-
-      list.find_map(entry_ranges_of_map, fn(entry_ranges) {
-        case range.intersection(input_range, source_range) {
-          Error(_) -> Ok([input_range])
-          Ok(intersection) -> {
-            todo
-          }
-        }
-
-        let offset = destination_range.start - source_range.start
-
-        range.intersection(input_range, source_range)
-        |> result.map(range.offset(_, offset))
-      })
-
-      bool.lazy_guard()
-
-      // Check if input_range hits a source_range.
-      // - False: Add to output_ranges without anything.
-      // - True: 
-      // -- Split input_range into smaller parts.
-      // -- Offset part of intersection.
-      // -- Add all parts to the list.
-
-      // Assumption: There are no overlapping `Range`s of `Entry`s in one `Map`.
-      case
-        list.find_map(ranges_of_entries, fn(ranges_of_entry) {
-          let #(source_range, destination_range) = ranges_of_entry
-          let offset = destination_range.start - source_range.start
-
-          range.intersection(input_range, source_range)
-          |> result.map(range.offset(_, offset))
-        })
-      {
-        Error(_) -> acc
-        Ok(offset_intersection) -> {
-          [offset_intersection, ..acc]
-        }
-      }
-    })
-    list.append(matched, missed)
-  })
+  translate_seed_ranges_layer(input_ranges, [])
 
   todo
 }
 
-fn seed_ranges(almanac: Almanac) -> List(Range) {
+fn translate_seed_ranges_layer(
+  input_ranges: List(Range),
+  output_ranges: List(Range),
+) -> List(Range) {
+  case input_ranges {
+    [input_range, ..rest] -> {
+      let ranges = translate_seed_ranges_src(input_range, [])
+      translate_seed_ranges_layer(rest, list.concat([ranges, output_ranges]))
+    }
+    [] -> todo
+  }
+}
+
+fn translate_seed_ranges_src(
+  src_range: Range,
+  intersections: List(Range),
+) -> List(Range) {
+  todo
+}
+
+pub fn seed_ranges(almanac: Almanac) -> List(Range) {
   almanac.seeds
   |> list.sized_chunk(2)
   |> list.map(fn(seed_range) {

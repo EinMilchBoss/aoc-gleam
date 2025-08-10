@@ -9,7 +9,7 @@ pub fn length(range: Range) -> Int {
   range.end_exclusive - range.start
 }
 
-pub fn offset(range: Range, offset: Int) -> Range {
+pub fn offset(range: Range, by offset: Int) -> Range {
   Range(
     start: range.start + offset,
     end_exclusive: range.end_exclusive + offset,
@@ -174,9 +174,10 @@ fn contains(this: Range, other: Range) -> Bool {
 }
 
 pub fn intersection(between this: Range, and other: Range) -> Result(Range, Nil) {
-  result.lazy_or(intersection_unidirectional(between: this, and: other), fn() {
-    intersection_unidirectional(between: other, and: this)
-  })
+  result.lazy_or(
+    intersection_unidirectional(between_left: this, and_right: other),
+    fn() { intersection_unidirectional(between_left: other, and_right: this) },
+  )
 }
 
 /// Returns the intersection between first and second.
