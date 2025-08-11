@@ -8,8 +8,15 @@ import gleam/result
 import gleam/string
 
 const string_to_int = [
-  #("one", 1), #("two", 2), #("three", 3), #("four", 4), #("five", 5),
-  #("six", 6), #("seven", 7), #("eight", 8), #("nine", 9),
+  #("one", 1),
+  #("two", 2),
+  #("three", 3),
+  #("four", 4),
+  #("five", 5),
+  #("six", 6),
+  #("seven", 7),
+  #("eight", 8),
+  #("nine", 9),
 ]
 
 pub fn main() {
@@ -60,7 +67,7 @@ fn parse_left(line: String) -> Int {
 
   case result.or(number, number_string) {
     Ok(n) -> n
-    Error(_) -> parse_left(string.drop_left(line, 1))
+    Error(_) -> parse_left(string.drop_start(line, 1))
   }
 }
 
@@ -89,7 +96,7 @@ fn parse_right(line: String) -> Int {
 
   case result.or(number, number_string) {
     Ok(n) -> n
-    Error(_) -> parse_right(string.drop_right(line, 1))
+    Error(_) -> parse_right(string.drop_start(line, 1))
   }
 }
 

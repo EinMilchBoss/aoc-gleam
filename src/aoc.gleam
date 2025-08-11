@@ -3,7 +3,7 @@ import aoc/part.{type Part}
 import gleam/int
 import gleam/order
 import gleam/string
-import gleam/string_builder as sb
+import gleam/string_tree as st
 
 pub fn run_fake_one(part: Part, expected expected: String) -> String {
   run_fake(part, expected:, with: input.fake_one)
@@ -34,15 +34,15 @@ pub fn run_fake(
     _ -> "FAIL"
   }
 
-  sb.new()
-  |> sb.append("Part ")
-  |> sb.append(part)
-  |> sb.append(" (fake): ")
-  |> sb.append(result)
-  |> sb.append(" (Result: ")
-  |> sb.append(test_result)
-  |> sb.append(")")
-  |> sb.to_string()
+  st.new()
+  |> st.append("Part ")
+  |> st.append(part)
+  |> st.append(" (fake): ")
+  |> st.append(result)
+  |> st.append(" (Result: ")
+  |> st.append(test_result)
+  |> st.append(")")
+  |> st.to_string()
 }
 
 pub fn run_real(part: Part) -> String {
@@ -56,10 +56,10 @@ pub fn run_real(part: Part) -> String {
     |> part.number()
     |> int.to_string()
 
-  sb.new()
-  |> sb.append("Part ")
-  |> sb.append(part)
-  |> sb.append(" (real): ")
-  |> sb.append(result)
-  |> sb.to_string()
+  st.new()
+  |> st.append("Part ")
+  |> st.append(part)
+  |> st.append(" (real): ")
+  |> st.append(result)
+  |> st.to_string()
 }

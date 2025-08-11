@@ -40,13 +40,13 @@ fn do_parse_numbers(from numbers: String, into acc: Set(Int)) -> Set(Int) {
   case
     numbers
     |> string.slice(at_index: 0, length: 2)
-    |> string.trim_left()
+    |> string.trim_start()
     |> int.parse()
   {
     Error(_) -> acc
     Ok(number) ->
       do_parse_numbers(
-        from: string.drop_left(numbers, up_to: 3),
+        from: string.drop_start(numbers, up_to: 3),
         into: set.insert(into: acc, this: number),
       )
   }

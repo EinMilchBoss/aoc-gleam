@@ -2,7 +2,7 @@ import gleam/int
 import gleam/io
 import gleam/result
 import gleam/string
-import gleam/string_builder as sb
+import gleam/string_tree as st
 import plinth/node/process
 import simplifile.{type FileError}
 
@@ -37,8 +37,8 @@ pub fn do_read_files(
   day day: Int,
   with read: fn(String) -> Result(String, FileError),
 ) -> Result(Input, ReadError) {
-  let year = int.to_string(year) |> string.pad_left(4, "0")
-  let day = int.to_string(day) |> string.pad_left(2, "0")
+  let year = int.to_string(year) |> string.pad_start(4, "0")
+  let day = int.to_string(day) |> string.pad_start(2, "0")
   let path = "./res/year_" <> year <> "/day_" <> day
 
   let read_file = read_file(_, with: read)
@@ -59,13 +59,13 @@ fn exit_on_file_error(result: Result(Input, ReadError)) -> Input {
   case result {
     Ok(content) -> content
     Error(error) -> {
-      sb.new()
-      |> sb.append("Could not load input file \"")
-      |> sb.append(error.file)
-      |> sb.append("\".\nReason: ")
-      |> sb.append(simplifile.describe_error(error.cause))
-      |> sb.append(".")
-      |> sb.to_string()
+      st.new()
+      |> st.append("Could not load input file \"")
+      |> st.append(error.file)
+      |> st.append("\".\nReason: ")
+      |> st.append(simplifile.describe_error(error.cause))
+      |> st.append(".")
+      |> st.to_string()
       |> io.println_error()
 
       process.exit(1)
