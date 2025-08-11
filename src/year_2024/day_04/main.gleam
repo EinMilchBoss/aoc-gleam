@@ -1,4 +1,5 @@
-import gleam/dict.{type Dict}
+import gleam/bool
+import gleam/dict
 import gleam/function
 import gleam/int
 import gleam/io
@@ -8,6 +9,7 @@ import gleam/string
 import aoc
 import aoc/input
 import aoc/part
+import year_2024/day_04/grid.{type Coordinate, type Grid}
 
 pub fn main() {
   let input = input.read_files(year: 2024, day: 4)
@@ -22,7 +24,7 @@ pub fn main() {
 }
 
 fn part_one(input: String) -> String {
-  let grid = grid_parse(input)
+  let grid = grid.parse(input)
 
   grid.values
   |> dict.keys()
@@ -32,41 +34,12 @@ fn part_one(input: String) -> String {
 }
 
 fn part_two(input: String) -> String {
-  let grid = grid_parse(input)
+  let grid = grid.parse(input)
 
   grid.values
   |> dict.keys()
   |> list.count(is_mas(grid, _))
   |> int.to_string()
-}
-
-pub type Coordinate {
-  Coordinate(x: Int, y: Int)
-}
-
-pub type Grid {
-  Grid(values: Dict(Coordinate, String), width: Int, height: Int)
-}
-
-pub fn grid_parse(input: String) -> Grid {
-  let lines = string.split(input, "\n")
-
-  let height = list.length(lines)
-
-  let assert Ok(line) = list.first(lines) as "the input has at least one line"
-  let width = line |> string.to_graphemes() |> list.length()
-
-  let values =
-    lines
-    |> list.map(string.to_graphemes)
-    |> list.index_map(fn(row, y) {
-      row
-      |> list.index_map(fn(char, x) { #(Coordinate(x, y), char) })
-    })
-    |> list.flatten()
-    |> dict.from_list()
-
-  Grid(values:, width:, height:)
 }
 
 fn is_mas(grid: Grid, coordinate: Coordinate) -> Bool {
@@ -78,8 +51,8 @@ fn is_mas_diagonal_increasing(grid: Grid, coordinate: Coordinate) -> Bool {
   is_mas_diagonal(
     grid,
     coordinate,
-    Coordinate(coordinate.x - 1, coordinate.y - 1),
-    Coordinate(coordinate.x + 1, coordinate.y + 1),
+    grid.Coordinate(coordinate.x - 1, coordinate.y - 1),
+    grid.Coordinate(coordinate.x + 1, coordinate.y + 1),
   )
 }
 
@@ -87,16 +60,9 @@ fn is_mas_diagonal_decreasing(grid: Grid, coordinate: Coordinate) -> Bool {
   is_mas_diagonal(
     grid,
     coordinate,
-    Coordinate(coordinate.x - 1, coordinate.y + 1),
-    Coordinate(coordinate.x + 1, coordinate.y - 1),
+    grid.Coordinate(coordinate.x - 1, coordinate.y + 1),
+    grid.Coordinate(coordinate.x + 1, coordinate.y - 1),
   )
-}
-
-fn grid_has_char_at(grid: Grid, coordinate: Coordinate, char: String) -> Bool {
-  case dict.get(grid.values, coordinate) {
-    Ok(value) if value == char -> True
-    _ -> False
-  }
 }
 
 fn is_mas_diagonal(
@@ -105,20 +71,19 @@ fn is_mas_diagonal(
   left: Coordinate,
   right: Coordinate,
 ) -> Bool {
-  case grid_has_char_at(grid, coordinate, "A") {
-    False -> False
-    True -> {
-      {
-        grid_has_char_at(grid, left, "M") && grid_has_char_at(grid, right, "S")
-      }
-      || {
-        grid_has_char_at(grid, left, "S") && grid_has_char_at(grid, right, "M")
-      }
-    }
-  }
+  use <- bool.guard(!grid.has_char_at(grid, coordinate, "A"), False)
+
+  let a =
+    grid.has_char_at(grid, left, "M") && grid.has_char_at(grid, right, "S")
+  let b =
+    grid.has_char_at(grid, left, "S") && grid.has_char_at(grid, right, "M")
+
+  a || b
 }
 
 pub fn count_xmas(grid: Grid, coordinate: Coordinate) -> Int {
+  use <- bool.guard(!grid.has_char_at(grid, coordinate, "X"), 0)
+
   [
     is_xmas_left_to_right(grid, coordinate),
     is_xmas_right_to_left(grid, coordinate),
@@ -134,25 +99,25 @@ pub fn count_xmas(grid: Grid, coordinate: Coordinate) -> Int {
 
 pub fn is_xmas_left_to_right(grid: Grid, coordinate: Coordinate) -> Bool {
   is_xmas_by_update(grid, coordinate, fn(coordinate) {
-    Coordinate(..coordinate, x: coordinate.x + 1)
+    grid.Coordinate(..coordinate, x: coordinate.x + 1)
   })
 }
 
 pub fn is_xmas_right_to_left(grid: Grid, coordinate: Coordinate) -> Bool {
   is_xmas_by_update(grid, coordinate, fn(coordinate) {
-    Coordinate(..coordinate, x: coordinate.x - 1)
+    grid.Coordinate(..coordinate, x: coordinate.x - 1)
   })
 }
 
 pub fn is_xmas_down_to_up(grid: Grid, coordinate: Coordinate) -> Bool {
   is_xmas_by_update(grid, coordinate, fn(coordinate) {
-    Coordinate(..coordinate, y: coordinate.y + 1)
+    grid.Coordinate(..coordinate, y: coordinate.y + 1)
   })
 }
 
 pub fn is_xmas_up_to_down(grid: Grid, coordinate: Coordinate) -> Bool {
   is_xmas_by_update(grid, coordinate, fn(coordinate) {
-    Coordinate(..coordinate, y: coordinate.y - 1)
+    grid.Coordinate(..coordinate, y: coordinate.y - 1)
   })
 }
 
@@ -161,7 +126,7 @@ pub fn is_xmas_diagonal_forward_increasing(
   coordinate: Coordinate,
 ) -> Bool {
   is_xmas_by_update(grid, coordinate, fn(coordinate) {
-    Coordinate(coordinate.x + 1, coordinate.y + 1)
+    grid.Coordinate(coordinate.x + 1, coordinate.y + 1)
   })
 }
 
@@ -170,7 +135,7 @@ pub fn is_xmas_diagonal_forward_decreasing(
   coordinate: Coordinate,
 ) -> Bool {
   is_xmas_by_update(grid, coordinate, fn(coordinate) {
-    Coordinate(coordinate.x + 1, coordinate.y - 1)
+    grid.Coordinate(coordinate.x + 1, coordinate.y - 1)
   })
 }
 
@@ -179,7 +144,7 @@ pub fn is_xmas_diagonal_backward_increasing(
   coordinate: Coordinate,
 ) -> Bool {
   is_xmas_by_update(grid, coordinate, fn(coordinate) {
-    Coordinate(coordinate.x - 1, coordinate.y + 1)
+    grid.Coordinate(coordinate.x - 1, coordinate.y + 1)
   })
 }
 
@@ -188,7 +153,7 @@ pub fn is_xmas_diagonal_backward_decreasing(
   coordinate: Coordinate,
 ) -> Bool {
   is_xmas_by_update(grid, coordinate, fn(coordinate) {
-    Coordinate(coordinate.x - 1, coordinate.y - 1)
+    grid.Coordinate(coordinate.x - 1, coordinate.y - 1)
   })
 }
 
