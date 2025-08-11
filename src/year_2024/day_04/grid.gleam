@@ -41,6 +41,8 @@ pub fn has_char_at(grid: Grid, coordinate: Coordinate, char: String) -> Bool {
 }
 
 pub fn is_mas(grid: Grid, coordinate: Coordinate) -> Bool {
+  use <- bool.guard(!has_char_at(grid, coordinate, "A"), False)
+
   is_mas_diagonal_increasing(grid, coordinate)
   && is_mas_diagonal_decreasing(grid, coordinate)
 }
@@ -48,7 +50,6 @@ pub fn is_mas(grid: Grid, coordinate: Coordinate) -> Bool {
 fn is_mas_diagonal_increasing(grid: Grid, coordinate: Coordinate) -> Bool {
   is_mas_diagonal(
     grid,
-    coordinate,
     Coordinate(coordinate.x - 1, coordinate.y - 1),
     Coordinate(coordinate.x + 1, coordinate.y + 1),
   )
@@ -57,20 +58,12 @@ fn is_mas_diagonal_increasing(grid: Grid, coordinate: Coordinate) -> Bool {
 fn is_mas_diagonal_decreasing(grid: Grid, coordinate: Coordinate) -> Bool {
   is_mas_diagonal(
     grid,
-    coordinate,
     Coordinate(coordinate.x - 1, coordinate.y + 1),
     Coordinate(coordinate.x + 1, coordinate.y - 1),
   )
 }
 
-fn is_mas_diagonal(
-  grid: Grid,
-  coordinate: Coordinate,
-  left: Coordinate,
-  right: Coordinate,
-) -> Bool {
-  use <- bool.guard(!has_char_at(grid, coordinate, "A"), False)
-
+fn is_mas_diagonal(grid: Grid, left: Coordinate, right: Coordinate) -> Bool {
   let a = has_char_at(grid, left, "M") && has_char_at(grid, right, "S")
   let b = has_char_at(grid, left, "S") && has_char_at(grid, right, "M")
 
