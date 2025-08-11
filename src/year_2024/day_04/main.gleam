@@ -1,15 +1,12 @@
-import gleam/bool
 import gleam/dict
-import gleam/function
 import gleam/int
 import gleam/io
 import gleam/list
-import gleam/string
 
 import aoc
 import aoc/input
 import aoc/part
-import year_2024/day_04/grid.{type Coordinate, type Grid}
+import year_2024/day_04/grid
 
 pub fn main() {
   let input = input.read_files(year: 2024, day: 4)
