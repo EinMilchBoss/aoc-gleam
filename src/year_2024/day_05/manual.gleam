@@ -1,4 +1,3 @@
-import gleam/bool
 import gleam/dict
 import gleam/int
 import gleam/list
@@ -77,13 +76,11 @@ fn do_manual_is_correct(pages: List(Int), rules: Rules) -> Bool {
   case pages {
     [] -> True
     [current, ..rest] -> {
-      let is_any_invalid =
-        rest
-        |> list.any(fn(next) { !is_page_valid(current, next, rules) })
-
-      use <- bool.guard(is_any_invalid, False)
-
-      do_manual_is_correct(rest, rules)
+      case list.any(rest, fn(next) { !is_page_valid(current, next, rules) }) {
+        // One page is wrong so the entire manual is wrong.
+        True -> False
+        False -> do_manual_is_correct(rest, rules)
+      }
     }
   }
 }
