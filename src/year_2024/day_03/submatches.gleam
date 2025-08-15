@@ -12,7 +12,7 @@ pub fn parse(submatches: Submatches) -> #(Int, Int) {
       let assert option.Some(number) =
         submatch
         |> option.map(fn(string) {
-          int.base_parse(string, 10) |> option.from_result()
+          string |> int.parse() |> option.from_result()
         })
         |> option.flatten()
         as "every submatch consists of a decimal number"

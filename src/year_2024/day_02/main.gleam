@@ -57,7 +57,7 @@ fn parse_reports(input: String) -> List(List(Int)) {
     line
     |> string.split(" ")
     |> list.map(fn(string) {
-      let assert Ok(number) = int.base_parse(string, 10)
+      let assert Ok(number) = int.parse(string)
         as "input contains only decimal numbers"
       number
     })

@@ -48,7 +48,7 @@ fn parse_column_lists(input: String) -> #(List(Int), List(Int)) {
   |> list.map(fn(line) {
     string.split(line, "   ")
     |> list.map(fn(n) {
-      let assert Ok(n) = int.base_parse(n, 10)
+      let assert Ok(n) = int.parse(n)
         as "input consists only of decimal numbers"
       n
     })
