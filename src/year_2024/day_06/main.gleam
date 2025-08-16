@@ -1,8 +1,10 @@
+import gleam/bool
 import gleam/function
 import gleam/int
 import gleam/io
 import gleam/list
 import gleam/option.{None, Some}
+import gleam/pair
 import gleam/set.{type Set}
 import gleam/string
 
@@ -24,11 +26,148 @@ pub fn main() {
 
 fn part_one(input: String) -> String {
   let grid = grid_parse(input)
-  grid_traverse(grid) |> set.size() |> int.to_string()
+
+  grid |> grid_traverse() |> set.size() |> int.to_string()
 }
 
 fn part_two(input: String) -> String {
-  todo
+  let grid = grid_parse(input)
+  let obstruction_possibilities = get_obstruction_possibilities(grid)
+
+  obstruction_possibilities
+  |> list.map(pair.second)
+  |> list.filter(fn(new_obstruction) {
+    set.contains(grid.obstructions, new_obstruction)
+  })
+  |> list.is_empty()
+
+  obstruction_possibilities
+  |> list.count(fn(obstruction_possibility) {
+    let #(player, added_obstruction) = obstruction_possibility
+
+    has_loop(grid, added_obstruction, player)
+  })
+  |> int.to_string()
+}
+
+fn has_loop(
+  grid: Grid,
+  added_obstruction: Coordinate,
+  player: #(Coordinate, Direction),
+) {
+  do_has_loop(
+    grid,
+    set.insert(grid.obstructions, added_obstruction),
+    player,
+    set.new(),
+  )
+}
+
+fn do_has_loop(
+  grid: Grid,
+  all_obstructions: Set(Coordinate),
+  player: #(Coordinate, Direction),
+  visited: Set(#(Coordinate, Direction)),
+) -> Bool {
+  let #(player_coordinate, player_direction) = player
+
+  case grid_contains(grid, player_coordinate) {
+    False -> False
+    True -> {
+      let next_visited = set.insert(visited, player)
+
+      case set.contains(visited, player) {
+        // We know it's a loop and can return.
+        True -> True
+        // We have to follow the rules until we are are either out of bounds or hitting a loop.
+        False -> {
+          let next_player_coordinate =
+            coordinate_walk(player_coordinate, player_direction)
+
+          case set.contains(all_obstructions, next_player_coordinate) {
+            False ->
+              do_has_loop(
+                grid,
+                all_obstructions,
+                #(next_player_coordinate, player_direction),
+                next_visited,
+              )
+            True -> {
+              let next_player_direction = direction_turn_right(player_direction)
+
+              do_has_loop(
+                grid,
+                all_obstructions,
+                #(player_coordinate, next_player_direction),
+                next_visited,
+              )
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+fn get_obstruction_possibilities(
+  grid: Grid,
+) -> List(#(#(Coordinate, Direction), Coordinate)) {
+  do_get_obstruction_possibilities(grid, #(grid.start, Up), set.new(), [])
+}
+
+fn do_get_obstruction_possibilities(
+  grid: Grid,
+  player: #(Coordinate, Direction),
+  added_obstructions: Set(Coordinate),
+  acc: List(#(#(Coordinate, Direction), Coordinate)),
+) -> List(#(#(Coordinate, Direction), Coordinate)) {
+  let #(player_coordinate, player_direction) = player
+
+  case grid_contains(grid, player_coordinate) {
+    // We are out of bounds and therefore done.
+    False -> acc
+    True -> {
+      let next_player_coordinate =
+        coordinate_walk(player_coordinate, player_direction)
+      let next_player_direction = direction_turn_right(player_direction)
+
+      case set.contains(grid.obstructions, next_player_coordinate) {
+        // We can't stack obstructions so we don't need to add one.
+        True ->
+          do_get_obstruction_possibilities(
+            grid,
+            #(player_coordinate, next_player_direction),
+            added_obstructions,
+            acc,
+          )
+        False -> {
+          case set.contains(added_obstructions, next_player_coordinate) {
+            // We mustn't add the same obstruction at a later point in time.
+            True ->
+              do_get_obstruction_possibilities(
+                grid,
+                #(next_player_coordinate, player_direction),
+                added_obstructions,
+                acc,
+              )
+            False ->
+              do_get_obstruction_possibilities(
+                grid,
+                #(next_player_coordinate, player_direction),
+                set.insert(added_obstructions, next_player_coordinate),
+                [
+                  #(
+                    #(player_coordinate, next_player_direction),
+                    next_player_coordinate,
+                  ),
+                  ..acc
+                ],
+              )
+          }
+        }
+      }
+    }
+  }
 }
 
 type Coordinate {
@@ -117,33 +256,40 @@ fn grid_contains(grid: Grid, coordinate: Coordinate) -> Bool {
 }
 
 fn grid_traverse(grid: Grid) -> Set(Coordinate) {
-  do_grid_traverse(grid, grid.start, Up, set.new())
+  do_grid_traverse(grid, #(grid.start, Up), set.new())
 }
 
 fn do_grid_traverse(
   grid: Grid,
-  player: Coordinate,
-  direction: Direction,
+  player: #(Coordinate, Direction),
   visited: Set(Coordinate),
 ) -> Set(Coordinate) {
-  case grid_contains(grid, player) {
+  let #(player_coordinate, player_direction) = player
+
+  case grid_contains(grid, player_coordinate) {
     // We are out of bounds and therefore done.
     False -> visited
     True -> {
-      let updated_visited = set.insert(visited, player)
-      let updated_player = coordinate_walk(player, direction)
+      let updated_visited = set.insert(visited, player_coordinate)
+      let updated_player_coordinate =
+        coordinate_walk(player_coordinate, player_direction)
 
-      case set.contains(grid.obstructions, updated_player) {
+      case set.contains(grid.obstructions, updated_player_coordinate) {
         // Continue until either out of bounds or an obstruction is hit.
         False ->
-          do_grid_traverse(grid, updated_player, direction, updated_visited)
-        // Turn right for now without moving forward because if there was an 
-        // obstruction immediately after turning, we would run into problems
-        True -> {
           do_grid_traverse(
             grid,
-            player,
-            direction_turn_right(direction),
+            #(updated_player_coordinate, player_direction),
+            updated_visited,
+          )
+        // Turn right for now without moving forward because if there was an 
+        // obstruction immediately after turning, we would run into it.
+        True -> {
+          let updated_player_direction = direction_turn_right(player_direction)
+
+          do_grid_traverse(
+            grid,
+            #(player_coordinate, updated_player_direction),
             updated_visited,
           )
         }
