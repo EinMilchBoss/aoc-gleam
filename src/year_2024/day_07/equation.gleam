@@ -38,11 +38,10 @@ fn do_is_solvable(
 ) -> Bool {
   case times {
     0 -> is_solved(equation)
-    _ -> {
+    _ ->
       equation
       |> next_possibilities(with: operators)
       |> list.any(do_is_solvable(_, operators, times - 1))
-    }
   }
 }
 
