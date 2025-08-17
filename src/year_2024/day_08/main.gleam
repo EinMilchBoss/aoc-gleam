@@ -25,9 +25,7 @@ fn part_one(input: String) -> String {
   let grid = grid.parse(input)
 
   grid
-  |> antinodes_by_model(fn(left, right) {
-    grid.nearest_antinodes_model(grid, left, right)
-  })
+  |> antinodes_by_model(grid.nearest_antinodes_model)
   |> set.size()
   |> int.to_string()
 }
@@ -36,16 +34,14 @@ fn part_two(input: String) -> String {
   let grid = grid.parse(input)
 
   grid
-  |> antinodes_by_model(fn(left, right) {
-    grid.all_antinodes_model(grid, left, right)
-  })
+  |> antinodes_by_model(grid.all_antinodes_model)
   |> set.size()
   |> int.to_string()
 }
 
 fn antinodes_by_model(
   grid: Grid,
-  model: fn(Coordinate, Coordinate) -> List(Coordinate),
+  model: fn(Grid, Coordinate, Coordinate) -> List(Coordinate),
 ) -> Set(Coordinate) {
   grid.frequencies
   |> list.flat_map(fn(antennas) {
@@ -55,7 +51,7 @@ fn antinodes_by_model(
       let assert [left, right] = combination
         as "all combinations have 2 elements"
 
-      model(left, right)
+      model(grid, left, right)
     })
   })
   |> set.from_list()
