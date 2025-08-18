@@ -1,7 +1,11 @@
+import gleam/function
 import gleam/int
 import gleam/io
 import gleam/list
+import gleam/result
 import gleam/set
+
+import parallel_map
 
 import aoc
 import aoc/input
@@ -30,11 +34,21 @@ fn part_two(input: String) -> String {
   let grid = grid.parse(input)
   let obstruction_possibilities = grid.get_obstruction_possibilities(grid)
 
-  obstruction_possibilities
-  |> list.count(fn(obstruction_possibility) {
-    let #(guard, added_obstruction) = obstruction_possibility
+  let assert Ok(results) =
+    obstruction_possibilities
+    |> parallel_map.list_pmap(
+      fn(obstruction_possibility) {
+        let #(guard, added_obstruction) = obstruction_possibility
 
-    grid.has_loop(grid, added_obstruction, guard)
-  })
+        grid.has_loop(grid, added_obstruction, guard)
+      },
+      parallel_map.MatchSchedulersOnline,
+      10_000,
+    )
+    |> result.all()
+    as "each computation does not take longer than 10 seconds"
+
+  results
+  |> list.count(function.identity)
   |> int.to_string()
 }

@@ -168,14 +168,13 @@ fn do_has_loop(
   grid: Grid,
   all_obstructions: Set(Coordinate),
   guard: GuardState,
-  visited: Set(GuardState),
+  turned: Set(GuardState),
 ) -> Bool {
   case contains(grid, guard.coordinate) {
+    // We are out of bounds and therefore no loop is in place.
     False -> False
     True -> {
-      let next_visited = set.insert(visited, guard)
-
-      case set.contains(visited, guard) {
+      case set.contains(turned, guard) {
         // We know it's a loop and can return.
         True -> True
         // We have to follow the rules until we are are either out of bounds or hitting a loop.
@@ -183,21 +182,18 @@ fn do_has_loop(
           let next_guard_stepped = guard.take_step(guard)
 
           case set.contains(all_obstructions, next_guard_stepped.coordinate) {
+            // We didn't turn so we don't have to update anything.
             False ->
-              do_has_loop(
-                grid,
-                all_obstructions,
-                next_guard_stepped,
-                next_visited,
-              )
+              do_has_loop(grid, all_obstructions, next_guard_stepped, turned)
             True -> {
               let next_guard_turned = guard.turn_right(guard)
+              let next_turned = set.insert(turned, guard)
 
               do_has_loop(
                 grid,
                 all_obstructions,
                 next_guard_turned,
-                next_visited,
+                next_turned,
               )
             }
           }

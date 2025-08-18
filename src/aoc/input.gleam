@@ -3,7 +3,6 @@ import gleam/io
 import gleam/result
 import gleam/string
 import gleam/string_tree as st
-import plinth/node/process
 import simplifile.{type FileError}
 
 pub opaque type Input {
@@ -68,7 +67,6 @@ fn exit_on_file_error(result: Result(Input, ReadError)) -> Input {
       |> st.to_string()
       |> io.println_error()
 
-      process.exit(1)
       panic
     }
   }
