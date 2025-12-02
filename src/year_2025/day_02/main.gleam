@@ -2,7 +2,10 @@ import gleam/bool
 import gleam/int
 import gleam/io
 import gleam/list
+import gleam/result
 import gleam/string
+
+import parallel_map
 
 import aoc
 import aoc/input
@@ -21,54 +24,72 @@ pub fn main() {
 }
 
 type Range {
-  Range(start: Int, end: Int, start_str: String, end_str: String)
+  Range(start: Int, end: Int)
 }
 
 fn part_one(input: String) -> String {
-  let ranges: List(Range) =
-    input
-    |> string.split(",")
-    |> list.map(fn(range) {
-      let assert [#(start, start_str), #(end, end_str)] =
-        range
-        |> string.split("-")
-        |> list.map(fn(string) {
-          let assert Ok(int) = int.parse(string)
-            as "every range consists of int bounds"
-          #(int, string)
-        })
-        as "every range consists of two bounds"
-
-      Range(start:, end:, start_str:, end_str:)
-    })
-
-  echo ranges as "ranges"
+  let ranges = parse(input)
 
   ranges
-  |> list.flat_map(fn(range) { get_invalid_ids(range) })
-  |> echo as "invalid ids"
+  |> list.map(get_invalid_ids_double)
   |> int.sum()
   |> int.to_string()
 }
 
-fn get_invalid_ids(range: Range) -> List(Int) {
-  do_get_invalid_ids(range.start, range.end, [])
+fn part_two(input: String) -> String {
+  let ranges = parse(input)
+
+  let assert Ok(addends) =
+    ranges
+    |> parallel_map.list_pmap(
+      get_invalid_ids_multiple,
+      parallel_map.MatchSchedulersOnline,
+      10_000,
+    )
+    |> result.all()
+    as "no computation takes longer than 10 seconds"
+
+  addends
+  |> int.sum()
+  |> int.to_string()
 }
 
-fn do_get_invalid_ids(current: Int, end: Int, acc: List(Int)) -> List(Int) {
-  case current <= end {
+fn parse(input: String) -> List(Range) {
+  input
+  |> string.split(",")
+  |> list.map(fn(range) {
+    let assert [start, end] =
+      range
+      |> string.split("-")
+      |> list.map(fn(string) {
+        let assert Ok(int) = int.parse(string)
+          as "every range consists of int bounds"
+        int
+      })
+      as "every range consists of two bounds"
+
+    Range(start:, end:)
+  })
+}
+
+fn get_invalid_ids_double(range: Range) -> Int {
+  do_get_invalid_ids_double(range.start, range.end, 0)
+}
+
+fn do_get_invalid_ids_double(id: Int, max_id_inclusive: Int, acc: Int) -> Int {
+  case id <= max_id_inclusive {
     False -> acc
     True -> {
-      let next_current = current + 1
-      case is_invalid_id(int.to_string(current)) {
-        True -> do_get_invalid_ids(next_current, end, [current, ..acc])
-        False -> do_get_invalid_ids(next_current, end, acc)
+      let next_id = id + 1
+      case is_invalid_id_double(int.to_string(id)) {
+        False -> do_get_invalid_ids_double(next_id, max_id_inclusive, acc)
+        True -> do_get_invalid_ids_double(next_id, max_id_inclusive, acc + id)
       }
     }
   }
 }
 
-fn is_invalid_id(id: String) -> Bool {
+fn is_invalid_id_double(id: String) -> Bool {
   let length = string.length(id)
   use <- bool.guard(length % 2 != 0, False)
 
@@ -80,80 +101,47 @@ fn is_invalid_id(id: String) -> Bool {
   head == tail
 }
 
-fn part_two(input: String) -> String {
-  let ranges: List(Range) =
-    input
-    |> string.split(",")
-    |> list.map(fn(range) {
-      let assert [#(start, start_str), #(end, end_str)] =
-        range
-        |> string.split("-")
-        |> list.map(fn(string) {
-          let assert Ok(int) = int.parse(string)
-            as "every range consists of int bounds"
-          #(int, string)
-        })
-        as "every range consists of two bounds"
-
-      Range(start:, end:, start_str:, end_str:)
-    })
-
-  ranges
-  |> list.flat_map(fn(range) { get_invalid_ids_multiple(range) })
-  |> int.sum()
-  |> int.to_string()
+fn get_invalid_ids_multiple(range: Range) -> Int {
+  do_get_invalid_ids_multiple(range.start, range.end, 0)
 }
 
-fn get_invalid_ids_multiple(range: Range) -> List(Int) {
-  do_get_invalid_ids_multiple(range.start, range.end, [])
-}
-
-fn do_get_invalid_ids_multiple(
-  current_id: Int,
-  max_id_inclusive: Int,
-  acc: List(Int),
-) -> List(Int) {
-  case current_id <= max_id_inclusive {
+fn do_get_invalid_ids_multiple(id: Int, max_id_inclusive: Int, acc: Int) -> Int {
+  case id <= max_id_inclusive {
     False -> acc
     True -> {
-      let next_id = current_id + 1
-      case is_invalid_id_multiple(int.to_string(current_id)) {
+      let next_id = id + 1
+      case is_invalid_id_multiple(int.to_string(id)) {
         False -> do_get_invalid_ids_multiple(next_id, max_id_inclusive, acc)
-        True ->
-          do_get_invalid_ids_multiple(next_id, max_id_inclusive, [
-            current_id,
-            ..acc
-          ])
+        True -> do_get_invalid_ids_multiple(next_id, max_id_inclusive, acc + id)
       }
     }
   }
 }
 
+// The computation of an invalid ID that has an arbitrary number of repetitions is slow.
+// Therefore we use an explicit recursion instead of precomputation and `list.any` to make it lazy.
 fn is_invalid_id_multiple(id: String) -> Bool {
+  // We only have to check until half, because it wouldn't be divisible otherwise.
   do_is_invalid_id_multiple(id, 1, string.length(id) / 2)
 }
 
-fn do_is_invalid_id_multiple(
-  id: String,
-  current_n: Int,
-  max_inclusive: Int,
-) -> Bool {
-  case current_n <= max_inclusive {
+fn do_is_invalid_id_multiple(id: String, n: Int, max_n_inclusive: Int) -> Bool {
+  case n <= max_n_inclusive {
     // We checked all possibilities and haven't encountered an invalid ID.
     // Therefore it must be a valid ID.
     False -> False
     True -> {
-      let next_n = current_n + 1
-      case split_id(id, current_n) {
+      let next_n = n + 1
+      case try_chunk_id(id, n) {
         // Cannot be split evenly with current n.
         // Skip this one entirely and continue with n + 1.
-        Error(Nil) -> do_is_invalid_id_multiple(id, next_n, max_inclusive)
+        Error(Nil) -> do_is_invalid_id_multiple(id, next_n, max_n_inclusive)
         Ok(chunks) -> {
           case are_all_same(chunks) {
             // When split by a certain n, all elements are the same.
             // Therefore it is an invalid ID.
             True -> True
-            False -> do_is_invalid_id_multiple(id, next_n, max_inclusive)
+            False -> do_is_invalid_id_multiple(id, next_n, max_n_inclusive)
           }
         }
       }
@@ -161,22 +149,23 @@ fn do_is_invalid_id_multiple(
   }
 }
 
-fn are_all_same(xs: List(String)) -> Bool {
-  case xs {
-    [] -> True
-    [head, ..tail] -> list.all(tail, fn(x) { x == head })
-  }
-}
-
-fn split_id(id: String, n: Int) -> Result(List(String), Nil) {
+fn try_chunk_id(id: String, n: Int) -> Result(List(String), Nil) {
   case string.length(id) % n == 0 {
     True ->
       Ok(
         id
         |> string.to_graphemes()
         |> list.sized_chunk(n)
-        |> list.map(fn(chunk) { string.concat(chunk) }),
+        |> list.map(string.concat),
       )
     False -> Error(Nil)
+  }
+}
+
+fn are_all_same(elements: List(String)) -> Bool {
+  case elements {
+    [] -> True
+    [first, ..rest_elements] ->
+      list.all(rest_elements, fn(element) { element == first })
   }
 }
