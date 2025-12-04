@@ -113,17 +113,3 @@ fn do_find_max(digits: List(Int), digits_length: Int, n: Int, acc: Int) -> Int {
     }
   }
 }
-
-/// Converts digits to an `Int` in base 10.
-/// For some reason, this isn't shipped anymore with Gleam's stdlib, so we have to manually recreate it.
-fn undigits(numbers: List(Int)) -> Result(Int, Nil) {
-  do_undigits(numbers, 0)
-}
-
-fn do_undigits(numbers: List(Int), acc: Int) -> Result(Int, Nil) {
-  case numbers {
-    [] -> Ok(acc)
-    [digit, ..] if digit < 0 || 9 < digit -> Error(Nil)
-    [digit, ..rest] -> do_undigits(rest, acc * 10 + digit)
-  }
-}
