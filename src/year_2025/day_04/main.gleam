@@ -1,13 +1,9 @@
-import gleam/dict.{type Dict}
-import gleam/float
+import gleam/function
 import gleam/int
 import gleam/io
 import gleam/list
-import gleam/result
 import gleam/set.{type Set}
 import gleam/string
-
-import parallel_map
 
 import aoc
 import aoc/input
@@ -25,105 +21,76 @@ pub fn main() {
   io.println(aoc.run_real(two))
 }
 
-type Grid {
-  Grid(tiles: Dict(Point, Tile), width: Int, height: Int)
-}
-
 type Point {
   Point(x: Int, y: Int)
 }
 
-type Tile {
-  Empty
-  Roll
-}
-
-fn parse_tile(grapheme: String) -> Result(Tile, Nil) {
-  case grapheme {
-    "@" -> Ok(Roll)
-    "." -> Ok(Empty)
-    _ -> Error(Nil)
-  }
-}
-
 fn part_one(input: String) -> String {
-  let grid = parse(input)
+  let roll_points = get_roll_points(input)
 
-  grid
+  roll_points
   |> get_accessible_rolls()
   |> set.size()
   |> int.to_string()
 }
 
 fn part_two(input: String) -> String {
-  let grid = parse(input)
+  let roll_points = get_roll_points(input)
 
-  get_all_accessible_rolls(grid) |> set.size() |> int.to_string()
+  roll_points
+  |> get_all_accessible_rolls()
+  |> set.size()
+  |> int.to_string()
 }
 
-fn parse(input: String) -> Grid {
-  let lines = string.split(input, "\n")
-  let height = list.length(lines)
-
-  let assert Ok(first_line) = list.first(lines)
-  let width = string.length(first_line)
-
-  let tiles =
-    lines
-    |> list.index_map(fn(line, y) {
-      line
-      |> string.to_graphemes()
-      |> list.index_map(fn(value, x) {
-        let assert Ok(tile) = parse_tile(value) as "we only pass graphemes"
-
-        #(Point(x:, y:), tile)
-      })
+fn get_roll_points(input: String) -> Set(Point) {
+  input
+  |> string.split("\n")
+  |> list.index_map(fn(line, y) {
+    line
+    |> string.to_graphemes()
+    |> list.index_map(fn(value, x) {
+      case is_roll(value) {
+        True -> Ok(Point(x:, y:))
+        False -> Error(Nil)
+      }
     })
-    |> list.flatten()
-    |> dict.from_list()
-
-  Grid(tiles:, width:, height:)
+    |> list.filter_map(function.identity)
+  })
+  |> list.flatten()
+  |> set.from_list()
 }
 
-fn get_all_accessible_rolls(grid: Grid) {
-  let roll_points =
-    grid.tiles
-    |> dict.filter(fn(_, value) { value == Roll })
-    |> dict.keys()
-  let all_roll_points = set.from_list(roll_points)
+fn is_roll(grapheme: String) -> Bool {
+  case grapheme {
+    "@" -> True
+    _ -> False
+  }
+}
 
-  do_get_all_accessible_rolls(roll_points, all_roll_points, set.new())
+fn get_all_accessible_rolls(roll_points: Set(Point)) {
+  do_get_all_accessible_rolls(roll_points, set.new())
 }
 
 fn do_get_all_accessible_rolls(
-  roll_points: List(Point),
-  all_roll_points: Set(Point),
+  roll_points: Set(Point),
   acc: Set(Point),
 ) -> Set(Point) {
-  let accessable_roll_points =
-    do_get_accessible_rolls(roll_points, all_roll_points, set.new())
-  let next_all_roll_points =
-    set.difference(all_roll_points, accessable_roll_points)
+  let accessible_roll_points = get_accessible_rolls(roll_points)
+  let next_roll_points = set.difference(roll_points, accessible_roll_points)
 
-  case set.size(accessable_roll_points) == 0 {
+  case set.size(accessible_roll_points) == 0 {
     True -> acc
     False ->
       do_get_all_accessible_rolls(
-        set.to_list(next_all_roll_points),
-        next_all_roll_points,
-        set.union(acc, accessable_roll_points),
+        next_roll_points,
+        set.union(acc, accessible_roll_points),
       )
   }
 }
 
-fn get_accessible_rolls(grid: Grid) -> Set(Point) {
-  let roll_points =
-    grid.tiles
-    |> dict.filter(fn(_, value) { value == Roll })
-    |> dict.keys()
-  let all_roll_points = set.from_list(roll_points)
-
-  do_get_accessible_rolls(roll_points, all_roll_points, set.new())
+fn get_accessible_rolls(roll_points: Set(Point)) -> Set(Point) {
+  do_get_accessible_rolls(set.to_list(roll_points), roll_points, set.new())
 }
 
 fn do_get_accessible_rolls(
@@ -134,7 +101,7 @@ fn do_get_accessible_rolls(
   case roll_points {
     [] -> acc
     [roll_point, ..next_roll_points] -> {
-      let neighbor_points = get_neighbors(of: roll_point)
+      let neighbor_points = get_neighbor_points_unchecked(roll_point)
 
       let intersection =
         set.intersection(of: neighbor_points, and: all_roll_points)
@@ -148,7 +115,8 @@ fn do_get_accessible_rolls(
   }
 }
 
-fn get_neighbors(of center: Point) -> Set(Point) {
+/// Returns all neighbors of a point even if they are out of bounds.
+fn get_neighbor_points_unchecked(center: Point) -> Set(Point) {
   [
     // Upper layer.
     Point(center.x - 1, center.y - 1),
