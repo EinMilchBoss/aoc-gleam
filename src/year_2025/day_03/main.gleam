@@ -74,10 +74,10 @@ fn find_max(digits: List(Int), n: Int) -> Int {
 }
 
 fn do_find_max(digits: List(Int), digits_length: Int, n: Int, acc: Int) -> Int {
-  case n {
-    // A number with 0 digits is no number. We are done.
-    0 -> acc
-    _ -> {
+  case n > 0 {
+    // A number with less than 0 digits is no number. We are done.
+    True -> acc
+    False -> {
       // We need at least n - 1 digits left or else we won't reach our required length.
       let possibles = list.take(digits, digits_length - n + 1)
 
