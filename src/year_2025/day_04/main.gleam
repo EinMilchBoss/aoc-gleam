@@ -29,7 +29,7 @@ fn part_one(input: String) -> String {
   let roll_points = get_roll_points(input)
 
   roll_points
-  |> get_accessible_rolls()
+  |> get_accessible_roll_points()
   |> set.size()
   |> int.to_string()
 }
@@ -38,7 +38,7 @@ fn part_two(input: String) -> String {
   let roll_points = get_roll_points(input)
 
   roll_points
-  |> get_all_accessible_rolls()
+  |> get_all_accessible_roll_points()
   |> set.size()
   |> int.to_string()
 }
@@ -68,32 +68,36 @@ fn is_roll(grapheme: String) -> Bool {
   }
 }
 
-fn get_all_accessible_rolls(roll_points: Set(Point)) {
-  do_get_all_accessible_rolls(roll_points, set.new())
+fn get_all_accessible_roll_points(roll_points: Set(Point)) -> Set(Point) {
+  do_get_all_accessible_roll_points(roll_points, set.new())
 }
 
-fn do_get_all_accessible_rolls(
+fn do_get_all_accessible_roll_points(
   roll_points: Set(Point),
   acc: Set(Point),
 ) -> Set(Point) {
-  let accessible_roll_points = get_accessible_rolls(roll_points)
+  let accessible_roll_points = get_accessible_roll_points(roll_points)
   let next_roll_points = set.difference(roll_points, accessible_roll_points)
 
   case set.size(accessible_roll_points) == 0 {
     True -> acc
     False ->
-      do_get_all_accessible_rolls(
+      do_get_all_accessible_roll_points(
         next_roll_points,
         set.union(acc, accessible_roll_points),
       )
   }
 }
 
-fn get_accessible_rolls(roll_points: Set(Point)) -> Set(Point) {
-  do_get_accessible_rolls(set.to_list(roll_points), roll_points, set.new())
+fn get_accessible_roll_points(roll_points: Set(Point)) -> Set(Point) {
+  do_get_accessible_roll_points(
+    set.to_list(roll_points),
+    roll_points,
+    set.new(),
+  )
 }
 
-fn do_get_accessible_rolls(
+fn do_get_accessible_roll_points(
   roll_points: List(Point),
   all_roll_points: Set(Point),
   acc: Set(Point),
@@ -110,7 +114,7 @@ fn do_get_accessible_rolls(
         False -> acc
       }
 
-      do_get_accessible_rolls(next_roll_points, all_roll_points, next_acc)
+      do_get_accessible_roll_points(next_roll_points, all_roll_points, next_acc)
     }
   }
 }
