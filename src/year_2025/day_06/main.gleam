@@ -65,7 +65,7 @@ fn part_one(input: String) -> String {
 fn part_two(input: String) -> String {
   let lines = string.split(input, "\n")
   let assert #(number_rows, [operations_row]) =
-    list.split(lines, list.length(lines) - 1)
+    list.split(lines, at: list.length(lines) - 1)
     as "the input has at least one line"
 
   let ordered_sizes =
@@ -192,7 +192,7 @@ fn do_munch_by_sizes(
       |> list.reverse()
     }
     [length, ..next_lengths] -> {
-      let #(part, rest) = list.split(graphemes, length)
+      let #(part, rest) = list.split(graphemes, at: length)
 
       // Remove the column of whitespace.
       let next_graphemes = list.drop(rest, 1)
